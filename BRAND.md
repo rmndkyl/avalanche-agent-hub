@@ -138,7 +138,7 @@ Minimum clear space around logo = 1× the height of the logomark on all sides.
 ### Social Media
 - Helpful first, promotional second
 - Share code snippets, not marketing copy
-- Tag `@layerairdrop` for attribution
+- Tag `@AgentHubAvax` for attribution
 
 ---
 
@@ -227,7 +227,7 @@ Minimum clear space around logo = 1× the height of the logomark on all sides.
 |------|------------|--------|
 | index.html | "Built by Layer Airdrop ID" + "Supported by Avalanche Team1 Builder Grants" | ✅ |
 | docs.html | "Built by Layer Airdrop ID • MIT License" | ✅ |
-| pitch.html | "Contact: @layerairdrop on Twitter" only | ⚠️ No builder attribution |
+| pitch.html | "Contact: @AgentHubAvax on Twitter" | ✅ Updated |
 
 ---
 

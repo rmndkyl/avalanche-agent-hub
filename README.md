@@ -132,4 +132,4 @@ MIT
 ## Contact
 
 - GitHub: [rmndkyl](https://github.com/rmndkyl)
-- Twitter: [@layerairdrop](https://twitter.com/layerairdrop)
+- Twitter: [@AgentHubAvax](https://twitter.com/AgentHubAvax)
