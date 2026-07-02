@@ -6,338 +6,873 @@
     <title>Avalanche Agent Hub — Developer Toolkit for AI Agents on Avalanche</title>
     <meta name="description" content="Open-source TypeScript SDK for deploying AI agents, managing multi-wallet operations, and creating on-chain quests on Avalanche.">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         :root {
-            --bg: #0a0a0f;
-            --surface: #12121a;
-            --card: #1a1a25;
-            --accent: #e84142;
-            --accent2: #ff6b6b;
-            --text: #e8e8ed;
-            --muted: #8888a0;
-            --border: #2a2a3a;
+            --bg: #000000;
+            --bg-elevated: #0a0a0a;
+            --surface: #111111;
+            --surface-hover: #1a1a1a;
+            --card: #0d0d0d;
+            --accent: #E84142;
+            --accent-light: #ff6b6b;
+            --accent-glow: rgba(232, 65, 66, 0.15);
+            --text: #ededed;
+            --text-secondary: #a1a1a6;
+            --text-tertiary: #6e6e73;
+            --border: #222222;
+            --border-hover: #333333;
+            --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+            --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --max-width: 1200px;
+            --transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            font-family: var(--font-sans);
             background: var(--bg);
             color: var(--text);
             line-height: 1.6;
+            overflow-x: hidden;
         }
-        
+
+        a { color: inherit; text-decoration: none; }
+
+        /* ─── NAV ─── */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .nav-brand svg { width: 28px; height: 28px; }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            transition: color var(--transition);
+        }
+
+        .nav-links a:hover { color: var(--text); }
+
+        .nav-cta {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            background: var(--text);
+            color: var(--bg) !important;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: opacity var(--transition);
+        }
+
+        .nav-cta:hover { opacity: 0.85; }
+
+        /* ─── HERO ─── */
         .hero {
+            position: relative;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             text-align: center;
-            padding: 2rem;
-            position: relative;
+            padding: 8rem 2rem 4rem;
             overflow: hidden;
         }
-        
-        .hero::before {
+
+        /* Gradient mesh background */
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .hero-bg .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.5;
+            animation: drift 20s ease-in-out infinite alternate;
+        }
+
+        .hero-bg .orb-1 {
+            width: 600px;
+            height: 600px;
+            background: var(--accent);
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0.12;
+        }
+
+        .hero-bg .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: #7c3aed;
+            top: 30%;
+            left: 15%;
+            opacity: 0.08;
+            animation-delay: -5s;
+        }
+
+        .hero-bg .orb-3 {
+            width: 350px;
+            height: 350px;
+            background: #3b82f6;
+            top: 20%;
+            right: 10%;
+            opacity: 0.07;
+            animation-delay: -10s;
+        }
+
+        @keyframes drift {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -20px) scale(1.05); }
+            66% { transform: translate(-20px, 30px) scale(0.95); }
+            100% { transform: translate(10px, -10px) scale(1.02); }
+        }
+
+        /* Grid overlay */
+        .hero-bg::after {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at 50% 50%, rgba(232, 65, 66, 0.08) 0%, transparent 50%);
-            animation: pulse 8s ease-in-out infinite;
+            inset: 0;
+            background-image:
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 60px 60px;
+            opacity: 0.3;
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 20%, transparent 70%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 20%, transparent 70%);
         }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-        }
-        
-        .logo {
-            font-size: 4rem;
-            margin-bottom: 1rem;
+
+        .hero-content {
             position: relative;
             z-index: 1;
+            max-width: 800px;
         }
-        
-        h1 {
-            font-size: clamp(2.5rem, 6vw, 4rem);
-            font-weight: 700;
-            margin-bottom: 1rem;
-            position: relative;
-            z-index: 1;
-        }
-        
-        h1 span { color: var(--accent); }
-        
-        .tagline {
-            font-size: 1.25rem;
-            color: var(--muted);
-            max-width: 600px;
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 1rem;
+            border-radius: 9999px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
             margin-bottom: 2rem;
-            position: relative;
-            z-index: 1;
+            animation: fadeInUp 0.8s ease-out;
         }
-        
-        .cta-group {
+
+        .hero-badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #22c55e;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.75rem, 7vw, 5rem);
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 0.8s ease-out 0.1s both;
+        }
+
+        .hero h1 .accent { color: var(--accent); }
+
+        .hero p {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            color: var(--text-secondary);
+            max-width: 560px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.7;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .hero-actions {
             display: flex;
             gap: 1rem;
-            flex-wrap: wrap;
             justify-content: center;
-            position: relative;
-            z-index: 1;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease-out 0.3s both;
         }
-        
+
         .btn {
-            padding: 1rem 2rem;
-            border-radius: 8px;
-            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            transition: all var(--transition);
+            border: none;
             text-decoration: none;
-            transition: all 0.2s;
-            font-size: 1rem;
         }
-        
+
+        .btn:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
         .btn-primary {
             background: var(--accent);
-            color: white;
+            color: #fff;
         }
-        
-        .btn-primary:hover {
-            background: var(--accent2);
-            transform: translateY(-2px);
-        }
-        
+
+        .btn-primary:hover { background: var(--accent-light); transform: translateY(-1px); }
+
         .btn-secondary {
-            background: var(--card);
+            background: var(--surface);
             color: var(--text);
             border: 1px solid var(--border);
         }
-        
+
         .btn-secondary:hover {
-            border-color: var(--accent);
+            border-color: var(--border-hover);
+            background: var(--surface-hover);
         }
-        
-        .modules {
-            padding: 6rem 2rem;
-            max-width: 1200px;
+
+        .btn svg { width: 18px; height: 18px; }
+
+        /* ─── STATS ─── */
+        .stats {
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .stats-inner {
+            max-width: var(--max-width);
             margin: 0 auto;
-        }
-        
-        .section-title {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 3rem;
-        }
-        
-        .section-title span { color: var(--accent); }
-        
-        .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .stat {
+            padding: 3rem 2rem;
+            text-align: center;
+            border-right: 1px solid var(--border);
+        }
+
+        .stat:last-child { border-right: none; }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--text), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-tertiary);
+            margin-top: 0.25rem;
+        }
+
+        /* ─── SECTIONS ─── */
+        .section {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 6rem 2rem;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 640px;
+            margin: 0 auto 4rem;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        .section-desc {
+            font-size: 1.0625rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* ─── FEATURE CARDS ─── */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 1.5rem;
         }
-        
-        .card {
-            background: var(--card);
+
+        .feature-card {
+            background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: var(--radius);
             padding: 2rem;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        
-        .card:hover {
-            border-color: var(--accent);
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--border-hover);
             transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
-        
-        .card-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
+
+        .feature-card:hover::before { opacity: 1; }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-sm);
+            background: var(--accent-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.25rem;
         }
-        
-        .card h3 {
-            font-size: 1.25rem;
-            margin-bottom: 0.75rem;
+
+        .feature-card h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
         }
-        
-        .card p {
-            color: var(--muted);
-            font-size: 0.95rem;
+
+        .feature-card p {
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
         }
-        
-        .code-block {
+
+        .feature-code {
             background: var(--bg);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             padding: 1rem;
-            margin-top: 1rem;
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 0.85rem;
+            font-family: var(--font-mono);
+            font-size: 0.8125rem;
+            line-height: 1.8;
+            overflow-x: auto;
+            white-space: pre;
+            color: var(--text-secondary);
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .feature-card:hover .feature-code {
+            opacity: 1;
+            max-height: 200px;
+            margin-top: 0.5rem;
+        }
+
+        /* syntax colors */
+        .kw { color: #c792ea; }
+        .fn { color: #82aaff; }
+        .str { color: #c3e88d; }
+        .cmt { color: #546e7a; }
+        .num { color: #f78c6c; }
+        .type { color: #ffcb6b; }
+
+        /* ─── WHY SECTION ─── */
+        .why-section {
+            background: var(--bg-elevated);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .why-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .why-card {
+            padding: 2rem;
+            border-radius: var(--radius);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .why-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .why-card-icon {
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .why-card h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .why-card p {
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ─── CODE EXAMPLE ─── */
+        .code-section {
+            background: var(--bg);
+        }
+
+        .code-example-wrapper {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .code-example-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .code-example-title {
+            font-size: 0.8125rem;
+            color: var(--text-tertiary);
+            font-family: var(--font-mono);
+        }
+
+        .copy-btn {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-family: var(--font-sans);
+            transition: all var(--transition);
+        }
+
+        .copy-btn:hover {
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .copy-btn:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .code-example-body {
+            padding: 1.5rem;
             overflow-x: auto;
         }
-        
-        .code-block .keyword { color: #c792ea; }
-        .code-block .string { color: #c3e88d; }
-        .code-block .comment { color: #546e7a; }
-        
-        .stats {
-            display: flex;
-            justify-content: center;
-            gap: 4rem;
-            padding: 4rem 2rem;
-            flex-wrap: wrap;
+
+        .code-example-body pre {
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin: 0;
+            white-space: pre;
         }
-        
-        .stat {
-            text-align: center;
-        }
-        
-        .stat-number {
-            font-size: 3rem;
-            font-weight: 700;
-            color: var(--accent);
-        }
-        
-        .stat-label {
-            color: var(--muted);
-            font-size: 0.9rem;
-        }
-        
-        .footer {
-            text-align: center;
-            padding: 3rem 2rem;
-            border-top: 1px solid var(--border);
-            color: var(--muted);
-        }
-        
-        .footer a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-        
-        .badge {
+
+        .code-line-num {
             display: inline-block;
-            background: rgba(232, 65, 66, 0.15);
-            color: var(--accent);
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
+            width: 2.5rem;
+            text-align: right;
+            padding-right: 1.5rem;
+            color: var(--text-tertiary);
+            user-select: none;
+        }
+
+        /* ─── FOOTER ─── */
+        .footer {
+            border-top: 1px solid var(--border);
+            padding: 4rem 2rem;
+        }
+
+        .footer-inner {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             font-weight: 600;
-            margin-bottom: 1rem;
+        }
+
+        .footer-brand svg { width: 24px; height: 24px; }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .footer-links a {
+            font-size: 0.875rem;
+            color: var(--text-tertiary);
+            transition: color var(--transition);
+        }
+
+        .footer-links a:hover { color: var(--text); }
+
+        .footer-links a:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 4px;
+        }
+
+        .footer-copy {
+            font-size: 0.8125rem;
+            color: var(--text-tertiary);
+            text-align: center;
+            max-width: var(--max-width);
+            margin: 2rem auto 0;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-copy a { color: var(--text-secondary); }
+        .footer-copy a:hover { color: var(--text); }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+
+            .stats-inner { grid-template-columns: repeat(2, 1fr); }
+
+            .stat { border-bottom: 1px solid var(--border); }
+            .stat:nth-child(2) { border-right: none; }
+
+            .features-grid,
+            .why-grid { grid-template-columns: 1fr; }
+
+            .footer-inner { flex-direction: column; text-align: center; }
+            .footer-links { justify-content: center; }
+        }
+
+        @media (max-width: 480px) {
+            .stats-inner { grid-template-columns: 1fr; }
+            .stat { border-right: none; }
+
+            .hero { padding: 6rem 1rem 3rem; }
+            .section { padding: 4rem 1rem; }
+        }
+
+        /* ─── ACCESSIBILITY ─── */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+            html { scroll-behavior: auto; }
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
         }
     </style>
 </head>
 <body>
-    <section class="hero">
-        <div class="logo">🔺</div>
-        <h1>Avalanche <span>Agent Hub</span></h1>
-        <p class="tagline">
-            Open-source developer toolkit for deploying AI agents, 
-            managing multi-wallet operations, and creating on-chain quests 
-            on Avalanche.
-        </p>
-        <div class="cta-group">
-            <a href="https://github.com/rmndkyl/avalanche-agent-hub" class="btn btn-primary">
-                View on GitHub
-            </a>
-            <a href="https://github.com/rmndkyl/avalanche-agent-hub#quick-start" class="btn btn-secondary">
-                Quick Start →
-            </a>
+
+    <!-- Nav -->
+    <nav class="nav" role="navigation" aria-label="Main navigation">
+        <a href="#" class="nav-brand" aria-label="Avalanche Agent Hub home">
+            <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M14 2L26 24H2L14 2Z" stroke="#E84142" stroke-width="2" fill="none"/>
+                <path d="M14 10L20 20H8L14 10Z" fill="#E84142"/>
+            </svg>
+            <span>Avalanche Agent Hub</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#why">Why Us</a></li>
+            <li><a href="#quickstart">Quick Start</a></li>
+            <li><a href="https://github.com/rmndkyl/avalanche-agent-hub" class="nav-cta">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero" aria-label="Introduction">
+        <div class="hero-bg" aria-hidden="true">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+            <div class="orb orb-3"></div>
         </div>
-    </section>
-    
-    <section class="stats">
-        <div class="stat">
-            <div class="stat-number">4</div>
-            <div class="stat-label">Core Modules</div>
-        </div>
-        <div class="stat">
-            <div class="stat-number">12</div>
-            <div class="stat-label">ADRs Documented</div>
-        </div>
-        <div class="stat">
-            <div class="stat-number">550+</div>
-            <div class="stat-label">Avalanche Projects</div>
-        </div>
-        <div class="stat">
-            <div class="stat-number">MIT</div>
-            <div class="stat-label">Open Source</div>
-        </div>
-    </section>
-    
-    <section class="modules">
-        <h2 class="section-title">What You Can <span>Build</span></h2>
-        <div class="grid">
-            <div class="card">
-                <div class="card-icon">📜</div>
-                <h3>Quest SDK</h3>
-                <p>Create, distribute, and verify on-chain quests. Social tasks + on-chain verification in one API.</p>
-                <div class="code-block">
-                    <span class="keyword">const</span> quest = <span class="keyword">await</span> hub.quest.<span class="keyword">create</span>({<br>
-                    &nbsp;&nbsp;title: <span class="string">"Complete 5 swaps"</span>,<br>
-                    &nbsp;&nbsp;tasks: [<span class="comment">/* ... */</span>]<br>
-                    });
-                </div>
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="dot" aria-hidden="true"></span>
+                Open Source &middot; MIT Licensed
             </div>
-            
-            <div class="card">
-                <div class="card-icon">🤖</div>
+            <h1>Build AI Agents<br>on <span class="accent">Avalanche</span></h1>
+            <p>The open-source developer toolkit for deploying autonomous agents, managing wallets, and creating on-chain quests — all on Avalanche.</p>
+            <div class="hero-actions">
+                <a href="https://github.com/rmndkyl/avalanche-agent-hub" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    View on GitHub
+                </a>
+                <a href="#quickstart" class="btn btn-secondary">
+                    Quick Start
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats" aria-label="Key statistics">
+        <div class="stats-inner">
+            <div class="stat">
+                <div class="stat-number">550+</div>
+                <div class="stat-label">Avalanche Projects</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">12</div>
+                <div class="stat-label">ADRs Documented</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">4</div>
+                <div class="stat-label">Core Modules</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">MIT</div>
+                <div class="stat-label">Open Source License</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- What You Can Build -->
+    <section class="section" id="features" aria-labelledby="features-title">
+        <div class="section-header">
+            <div class="section-label">Features</div>
+            <h2 class="section-title" id="features-title">What You Can Build</h2>
+            <p class="section-desc">Three battle-tested modules that cover the full agent lifecycle — from wallet management to on-chain quests.</p>
+        </div>
+        <div class="features-grid">
+
+            <div class="feature-card">
+                <div class="feature-icon" aria-hidden="true">📜</div>
+                <h3>Quest SDK</h3>
+                <p>Create, distribute, and verify on-chain quests. Social tasks plus on-chain verification in a single API.</p>
+                <div class="feature-code" aria-label="Quest SDK code example"><span class="kw">const</span> quest = <span class="kw">await</span> hub.quest.<span class="fn">create</span>({
+  <span class="type">title</span>: <span class="str">"Complete 5 swaps"</span>,
+  <span class="type">tasks</span>: [<span class="cmt">/* on-chain checks */</span>]
+});</div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon" aria-hidden="true">🤖</div>
                 <h3>Agent Kit</h3>
                 <p>Deploy AI agent templates on Avalanche. Trading, monitoring, portfolio management — out of the box.</p>
-                <div class="code-block">
-                    <span class="keyword">const</span> agent = <span class="keyword">await</span> hub.agent.<span class="keyword">deploy</span>({<br>
-                    &nbsp;&nbsp;type: <span class="string">"trader"</span>,<br>
-                    &nbsp;&nbsp;rules: { maxTradeSize: <span class="string">"100 USDC"</span> }<br>
-                    });
-                </div>
+                <div class="feature-code" aria-label="Agent Kit code example"><span class="kw">const</span> agent = <span class="kw">await</span> hub.agent.<span class="fn">deploy</span>({
+  <span class="type">type</span>: <span class="str">"trader"</span>,
+  <span class="type">rules</span>: { <span class="type">maxTradeSize</span>: <span class="str">"100 USDC"</span> }
+});</div>
             </div>
-            
-            <div class="card">
-                <div class="card-icon">💰</div>
+
+            <div class="feature-card">
+                <div class="feature-icon" aria-hidden="true">💰</div>
                 <h3>Wallet Manager</h3>
                 <p>Multi-wallet management with AES-256 encryption. Portfolio tracking across all Avalanche chains.</p>
-                <div class="code-block">
-                    <span class="keyword">const</span> portfolio = <span class="keyword">await</span> hub.wallet.<span class="keyword">portfolio</span>(<br>
-                    &nbsp;&nbsp;wallets<br>
-                    );
+                <div class="feature-code" aria-label="Wallet Manager code example"><span class="kw">const</span> portfolio = <span class="kw">await</span> hub.wallet.<span class="fn">portfolio</span>(
+  <span class="type">wallets</span>
+);</div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Why Avalanche Agent Hub -->
+    <section class="why-section" id="why" aria-labelledby="why-title">
+        <div class="section">
+            <div class="section-header">
+                <div class="section-label">Why Us</div>
+                <h2 class="section-title" id="why-title">Why Avalanche Agent Hub</h2>
+                <p class="section-desc">Built by operators, not theorists. Every line comes from production experience.</p>
+            </div>
+            <div class="why-grid">
+                <div class="why-card">
+                    <div class="why-card-icon" aria-hidden="true">🎯</div>
+                    <h3>Battle-Tested</h3>
+                    <p>Built from production experience with 11+ working bots across multiple chains. Real code, real wallets, real transactions — not theoretical frameworks.</p>
+                </div>
+                <div class="why-card">
+                    <div class="why-card-icon" aria-hidden="true">🔗</div>
+                    <h3>Avalanche-Native</h3>
+                    <p>Built on official @avalanche-sdk/client with first-class support for C-Chain, L1s, and Subnets. Deep integration, not a thin wrapper.</p>
+                </div>
+                <div class="why-card">
+                    <div class="why-card-icon" aria-hidden="true">🚀</div>
+                    <h3>Agentic Economy Ready</h3>
+                    <p>Aligned with KiteAI's vision for AI agents on Avalanche. A $33M ecosystem with 715M+ agent calls and growing every day.</p>
                 </div>
             </div>
         </div>
     </section>
-    
-    <section class="modules" style="background: var(--surface);">
-        <h2 class="section-title">Why <span>Avalanche Agent Hub</span>?</h2>
-        <div class="grid">
-            <div class="card">
-                <div class="card-icon">🎯</div>
-                <h3>Battle-Tested</h3>
-                <p>Built from production experience with 11+ working bots across multiple chains. Not theoretical — real code, real wallets, real transactions.</p>
+
+    <!-- Code Example -->
+    <section class="section code-section" id="quickstart" aria-labelledby="quickstart-title">
+        <div class="section-header">
+            <div class="section-label">Quick Start</div>
+            <h2 class="section-title" id="quickstart-title">Up and running in 30 seconds</h2>
+            <p class="section-desc">Install, import, and deploy your first agent with a few lines of TypeScript.</p>
+        </div>
+        <div class="code-example-wrapper">
+            <div class="code-example-header">
+                <span class="code-example-title">quickstart.ts</span>
+                <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('code-block').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)})" aria-label="Copy code to clipboard">Copy</button>
             </div>
-            
-            <div class="card">
-                <div class="card-icon">🔗</div>
-                <h3>Avalanche-Native</h3>
-                <p>Built on official @avalanche-sdk/client. First-class support for C-Chain, L1s, and Subnets.</p>
-            </div>
-            
-            <div class="card">
-                <div class="card-icon">🚀</div>
-                <h3>Agentic Economy Ready</h3>
-                <p>Aligned with KiteAI's vision for AI agents on Avalanche. $33M ecosystem, 715M+ agent calls and growing.</p>
+            <div class="code-example-body">
+                <pre id="code-block"><span class="code-line-num"> 1</span>  <span class="cmt">// Install: npm install @avalanche-agent-hub/core</span>
+<span class="code-line-num"> 2</span>  <span class="kw">import</span> { <span class="type">AvalancheHub</span> } <span class="kw">from</span> <span class="str">'@avalanche-agent-hub/core'</span>;
+<span class="code-line-num"> 3</span>
+<span class="code-line-num"> 4</span>  <span class="cmt">// Initialize the hub</span>
+<span class="code-line-num"> 5</span>  <span class="kw">const</span> hub = <span class="kw">new</span> <span class="type">AvalancheHub</span>({
+<span class="code-line-num"> 6</span>    <span class="type">network</span>: <span class="str">'mainnet'</span>,
+<span class="code-line-num"> 7</span>    <span class="type">encryptionKey</span>: process.env.<span class="type">AGENT_KEY</span>,
+<span class="code-line-num"> 8</span>  });
+<span class="code-line-num"> 9</span>
+<span class="code-line-num">10</span>  <span class="cmt">// Create an encrypted wallet for the agent</span>
+<span class="code-line-num">11</span>  <span class="kw">const</span> wallet = <span class="kw">await</span> hub.wallet.<span class="fn">create</span>({
+<span class="code-line-num">12</span>    <span class="type">name</span>: <span class="str">'my-trading-agent'</span>,
+<span class="code-line-num">13</span>  });
+<span class="code-line-num">14</span>
+<span class="code-line-num">15</span>  <span class="cmt">// Deploy a trading agent with guardrails</span>
+<span class="code-line-num">16</span>  <span class="kw">const</span> agent = <span class="kw">await</span> hub.agent.<span class="fn">deploy</span>({
+<span class="code-line-num">17</span>    <span class="type">type</span>: <span class="str">'trader'</span>,
+<span class="code-line-num">18</span>    <span class="type">wallet</span>: wallet.address,
+<span class="code-line-num">19</span>    <span class="type">rules</span>: {
+<span class="code-line-num">20</span>      <span class="type">maxTradeSize</span>: <span class="str">'100'</span>,
+<span class="code-line-num">21</span>      <span class="type">stopLoss</span>: <span class="str">'5'</span>,
+<span class="code-line-num">22</span>      <span class="type">allowedTokens</span>: [<span class="str">'AVAX'</span>, <span class="str">'USDC'</span>, <span class="str">'JOE'</span>],
+<span class="code-line-num">23</span>    },
+<span class="code-line-num">24</span>  });
+<span class="code-line-num">25</span>
+<span class="code-line-num">26</span>  console.<span class="fn">log</span>(<span class="str">`Agent deployed: </span><span class="kw">${</span>agent.id<span class="kw">}</span><span class="str">`</span>);</pre>
             </div>
         </div>
     </section>
-    
-    <footer class="footer">
-        <p>
-            Built by <a href="https://github.com/rmndkyl">Layer Airdrop ID</a> • 
-            <a href="https://github.com/rmndkyl/avalanche-agent-hub">GitHub</a> • 
-            <a href="https://twitter.com/layerairdrop">Twitter</a>
-        </p>
-        <p style="margin-top: 1rem; font-size: 0.85rem;">
-            Supported by <a href="https://team1.network">Avalanche Team1</a> Builder Grants
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="footer-inner">
+            <a href="#" class="footer-brand" aria-label="Avalanche Agent Hub">
+                <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M14 2L26 24H2L14 2Z" stroke="#E84142" stroke-width="2" fill="none"/>
+                    <path d="M14 10L20 20H8L14 10Z" fill="#E84142"/>
+                </svg>
+                <span>Avalanche Agent Hub</span>
+            </a>
+            <ul class="footer-links">
+                <li><a href="https://github.com/rmndkyl/avalanche-agent-hub">GitHub</a></li>
+                <li><a href="https://twitter.com/layerairdrop">Twitter</a></li>
+                <li><a href="https://github.com/rmndkyl/avalanche-agent-hub/blob/main/README.md">Docs</a></li>
+                <li><a href="https://team1.network">Team1 Grants</a></li>
+            </ul>
+        </div>
+        <p class="footer-copy">
+            Built by <a href="https://github.com/rmndkyl">Layer Airdrop ID</a> &middot; Supported by <a href="https://team1.network">Avalanche Team1</a> Builder Grants &middot; MIT License
         </p>
     </footer>
+
 </body>
 </html>
