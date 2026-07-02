@@ -18,6 +18,10 @@ contract AgentRegistry is
     PausableUpgradeable,
     UUPSUpgradeable
 {
+    // --- Constants ---
+    uint256 public constant MAX_TOKENS = 100;
+    uint256 public constant MAX_TRANSACTION_COUNT = 1000;
+
     // --- Custom Errors ---
     error ZeroAddress();
     error AgentNotFound();
@@ -26,6 +30,9 @@ contract AgentRegistry is
     error OnlyAgentOwner();
     error InvalidStopLoss();
     error InvalidMaxTradeSize();
+    error TooManyTokens();
+    error InvalidTransactionCount();
+    error DuplicateToken();
 
     // --- Storage ---
     mapping(uint256 => AgentConfig) private _agents;
@@ -60,6 +67,7 @@ contract AgentRegistry is
         if (wallet == address(0)) revert ZeroAddress();
         if (stopLossBps > Types.MAX_BPS) revert InvalidStopLoss();
         if (maxTradeSize == 0) revert InvalidMaxTradeSize();
+        if (allowedTokens.length > MAX_TOKENS) revert TooManyTokens();
 
         uint256 agentId = ++_agentCounter;
 
@@ -74,7 +82,9 @@ contract AgentRegistry is
         config.createdAt = block.timestamp;
 
         // Store allowed tokens — separate mapping for gas-efficient iteration
+        // Skip duplicates
         for (uint256 i; i < allowedTokens.length; ++i) {
+            if (_tokenLookup[agentId][allowedTokens[i]]) continue;
             _allowedTokens[agentId].push(allowedTokens[i]);
             _tokenLookup[agentId][allowedTokens[i]] = true;
         }
@@ -93,6 +103,7 @@ contract AgentRegistry is
         AgentConfig storage config = _agents[agentId];
         if (config.wallet == address(0)) revert AgentNotFound();
         if (msg.sender != config.owner && msg.sender != config.wallet) revert OnlyAgentOwner();
+        if (transactionCount == 0 || transactionCount > MAX_TRANSACTION_COUNT) revert InvalidTransactionCount();
 
         // Effects before interactions (no external calls here, but pattern-consistent)
         config.totalTransactions += transactionCount;
@@ -101,22 +112,24 @@ contract AgentRegistry is
         emit AgentActivity(agentId, transactionCount);
     }
 
-    /// @notice Pause an agent (owner only)
+    /// @notice Pause an agent (owner or agent owner)
     /// @param agentId Agent identifier
-    function pauseAgent(uint256 agentId) external onlyOwner {
+    function pauseAgent(uint256 agentId) external {
         AgentConfig storage config = _agents[agentId];
         if (config.wallet == address(0)) revert AgentNotFound();
+        if (msg.sender != owner() && msg.sender != config.owner) revert OnlyAgentOwner();
         if (config.status != AgentStatus.Active) revert AgentNotActive();
 
         config.status = AgentStatus.Paused;
         emit AgentStatusChanged(agentId, AgentStatus.Paused);
     }
 
-    /// @notice Unpause a paused agent (owner only)
+    /// @notice Unpause a paused agent (owner or agent owner)
     /// @param agentId Agent identifier
-    function unpauseAgent(uint256 agentId) external onlyOwner {
+    function unpauseAgent(uint256 agentId) external {
         AgentConfig storage config = _agents[agentId];
         if (config.wallet == address(0)) revert AgentNotFound();
+        if (msg.sender != owner() && msg.sender != config.owner) revert OnlyAgentOwner();
         if (config.status != AgentStatus.Paused) revert AgentNotActive();
 
         config.status = AgentStatus.Active;

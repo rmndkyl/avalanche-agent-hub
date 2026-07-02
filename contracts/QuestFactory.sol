@@ -22,9 +22,13 @@ contract QuestFactory is
 {
     using SafeERC20 for IERC20;
 
+    // --- Constants ---
+    uint256 public constant MAX_TASKS = 50;
+
     // --- Custom Errors ---
     error ZeroAddress();
     error EmptyTasks();
+    error TooManyTasks();
     error InvalidTaskIndex();
     error QuestNotFound();
     error QuestNotActive();
@@ -33,15 +37,21 @@ contract QuestFactory is
     error RewardAlreadyClaimed();
     error InsufficientBalance();
     error OnlyQuestCreator();
+    error EmptyTitle();
 
     // --- Storage ---
     mapping(uint256 => Quest) private _quests;
     mapping(uint256 => mapping(address => mapping(uint256 => bool))) private _taskCompleted;
     mapping(uint256 => mapping(address => uint256)) private _completedTaskCount;
     mapping(uint256 => mapping(address => bool)) private _rewardClaimed;
+    mapping(uint256 => mapping(address => bool)) private _questCompletedByUser;
     mapping(uint256 => uint256) private _totalTasks;
+    mapping(uint256 => uint256) private _fundedAmount;
     mapping(address => uint256[]) private _questsByCreator;
     uint256 private _questCounter;
+
+    // --- Events ---
+    event QuestFunded(uint256 indexed questId, address indexed funder, uint256 amount);
 
     // --- Initializer (replaces constructor for proxy) ---
     function initialize(address initialOwner) external initializer {
@@ -64,7 +74,9 @@ contract QuestFactory is
         address rewardToken,
         uint256 rewardAmount
     ) external whenNotPaused returns (uint256) {
+        if (bytes(title).length == 0) revert EmptyTitle();
         if (tasks.length == 0) revert EmptyTasks();
+        if (tasks.length > MAX_TASKS) revert TooManyTasks();
         if (rewardToken == address(0)) revert ZeroAddress();
 
         uint256 questId = ++_questCounter;
@@ -99,10 +111,27 @@ contract QuestFactory is
         return questId;
     }
 
+    /// @notice Fund a quest with reward tokens
+    /// @dev Must be called after createQuest to enable rewards
+    /// @param questId Quest identifier
+    /// @param amount Total amount to fund (covers multiple completions)
+    function fundQuest(uint256 questId, uint256 amount) external whenNotPaused {
+        Quest storage q = _quests[questId];
+        if (q.id == 0) revert QuestNotFound();
+        if (q.creator != msg.sender) revert OnlyQuestCreator();
+        if (amount == 0) revert InsufficientBalance();
+
+        // Transfer tokens from creator to contract
+        IERC20(q.rewardToken).safeTransferFrom(msg.sender, address(this), amount);
+        _fundedAmount[questId] += amount;
+
+        emit QuestFunded(questId, msg.sender, amount);
+    }
+
     /// @notice Mark a specific quest task as completed for the caller
     /// @param questId Quest identifier
     /// @param taskIndex Index within the quest's task array
-    function completeTask(uint256 questId, uint256 taskIndex) external whenNotPaused {
+    function completeTask(uint256 questId, uint256 taskIndex) external nonReentrant whenNotPaused {
         if (_quests[questId].id == 0) revert QuestNotFound();
         if (_quests[questId].status != QuestStatus.Active) revert QuestNotActive();
         if (taskIndex >= _totalTasks[questId]) revert InvalidTaskIndex();
@@ -112,9 +141,9 @@ contract QuestFactory is
         _taskCompleted[questId][msg.sender][taskIndex] = true;
         _completedTaskCount[questId][msg.sender]++;
 
-        // Check if all tasks completed → auto-complete quest
+        // Check if all tasks completed → mark per-user (NOT global status)
         if (_completedTaskCount[questId][msg.sender] == _totalTasks[questId]) {
-            _quests[questId].status = QuestStatus.Completed;
+            _questCompletedByUser[questId][msg.sender] = true;
             emit QuestCompleted(questId, msg.sender);
         }
 
@@ -126,8 +155,12 @@ contract QuestFactory is
     function claimReward(uint256 questId) external nonReentrant whenNotPaused {
         Quest storage q = _quests[questId];
         if (q.id == 0) revert QuestNotFound();
-        if (q.status != QuestStatus.Completed) revert QuestNotCompleted();
+        if (!_questCompletedByUser[questId][msg.sender]) revert QuestNotCompleted();
         if (_rewardClaimed[questId][msg.sender]) revert RewardAlreadyClaimed();
+
+        // Check contract has enough balance
+        uint256 balance = IERC20(q.rewardToken).balanceOf(address(this));
+        if (balance < q.rewardAmount) revert InsufficientBalance();
 
         // Effects before interactions
         _rewardClaimed[questId][msg.sender] = true;
@@ -151,6 +184,21 @@ contract QuestFactory is
     /// @return Array of quest IDs
     function getQuestsByCreator(address creator) external view returns (uint256[] memory) {
         return _questsByCreator[creator];
+    }
+
+    /// @notice Check if a user has completed all tasks for a quest
+    /// @param questId Quest identifier
+    /// @param wallet User address
+    /// @return true if user completed all tasks
+    function isQuestCompleted(uint256 questId, address wallet) external view returns (bool) {
+        return _questCompletedByUser[questId][wallet];
+    }
+
+    /// @notice Get funded amount for a quest
+    /// @param questId Quest identifier
+    /// @return Funded amount
+    function getFundedAmount(uint256 questId) external view returns (uint256) {
+        return _fundedAmount[questId];
     }
 
     /// @notice Get indices of completed tasks for a wallet on a quest
