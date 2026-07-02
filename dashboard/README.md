@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Avalanche Agent Hub Dashboard
 
-## Getting Started
+Next.js dashboard for Avalanche Agent Hub.
 
-First, run the development server:
+## What it shows
+- Live Fuji RPC status
+- Current block number
+- Current gas price
+- Deployer balance
+- On-chain presence of `AgentRegistry` and `QuestFactory`
+- Snowtrace links for both contracts
 
+## Run locally
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Data source
+Dashboard reads live chain data from:
+- `https://api.avax-test.network/ext/bc/C/rpc`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Deployment metadata lives in:
+- `src/lib/avalanche.ts`
 
-## Learn More
+## Current contracts
+- AgentRegistry: `0x58aaa6Af773E419D3334fD671EA87bCea1bEF90c`
+- QuestFactory: `0x53ecd26D6D45fd19D5E0CE84E326124F55bf9DCA`
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+ponytail: no ABI reads yet, only RPC + bytecode existence. Add contract method reads when public view schema is finalized.

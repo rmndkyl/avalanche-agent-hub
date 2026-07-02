@@ -1,63 +1,70 @@
 'use client'
 
 import { useState } from 'react'
+import { deployment, FUJI_RPC_URL } from '@/lib/avalanche'
+
+const networks = [
+  { key: 'mainnet', label: 'Mainnet', description: 'Avalanche C-Chain production', disabled: true },
+  { key: 'testnet', label: 'Testnet', description: 'Fuji Testnet active deployment', disabled: false },
+] as const
 
 export default function SettingsPage() {
-  const [network, setNetwork] = useState('testnet')
-  const [theme, setTheme] = useState('dark')
+  const [network, setNetwork] = useState<'mainnet' | 'testnet'>('testnet')
 
   return (
-    <div className="space-y-8 max-w-lg">
-      <h1 className="text-2xl font-bold">Settings</h1>
+    <div className="space-y-8 max-w-2xl">
+      <div>
+        <h1 className="text-2xl font-bold">Settings</h1>
+        <p className="text-sm text-muted mt-1">Current project config. No wallet write actions yet.</p>
+      </div>
 
-      {/* Network */}
       <section className="bg-card rounded-xl p-5 border border-white/5 space-y-3">
         <h2 className="font-semibold text-sm">Network</h2>
-        <div className="flex gap-2">
-          {['mainnet', 'testnet'].map((n) => (
+        <div className="flex gap-2 flex-wrap">
+          {networks.map((n) => (
             <button
-              key={n}
-              onClick={() => setNetwork(n)}
-              className={`px-4 py-2 rounded-lg text-sm capitalize transition-colors ${
-                network === n
+              key={n.key}
+              onClick={() => !n.disabled && setNetwork(n.key)}
+              disabled={n.disabled}
+              className={`px-4 py-2 rounded-lg text-sm transition-colors ${
+                network === n.key
                   ? 'bg-accent text-white'
                   : 'bg-surface border border-white/5 text-muted hover:text-text'
-              }`}
+              } ${n.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              {n}
+              {n.label}
             </button>
           ))}
         </div>
         <p className="text-muted text-xs">
-          {network === 'mainnet' ? 'Production Avalanche C-Chain' : 'Fuji Testnet (Avalanche)'}
+          {networks.find((item) => item.key === network)?.description}
         </p>
       </section>
 
-      {/* Wallet */}
       <section className="bg-card rounded-xl p-5 border border-white/5 space-y-3">
-        <h2 className="font-semibold text-sm">Wallet</h2>
-        <button className="bg-surface border border-white/5 rounded-lg px-4 py-2 text-sm text-muted hover:text-text transition-colors w-full text-left">
-          🔗 Connect Wallet
-        </button>
-        <p className="text-muted text-xs">Connect your Avalanche wallet to interact with the hub.</p>
+        <h2 className="font-semibold text-sm">RPC</h2>
+        <div className="bg-surface border border-white/5 rounded-lg px-4 py-3 font-mono text-xs break-all text-muted">
+          {FUJI_RPC_URL}
+        </div>
+        <p className="text-muted text-xs">Dashboard pages fetch live chain data from this endpoint.</p>
       </section>
 
-      {/* Theme */}
       <section className="bg-card rounded-xl p-5 border border-white/5 space-y-3">
-        <h2 className="font-semibold text-sm">Theme</h2>
-        <div className="flex gap-2">
-          {['dark', 'light'].map((t) => (
-            <button
-              key={t}
-              onClick={() => setTheme(t)}
-              className={`px-4 py-2 rounded-lg text-sm capitalize transition-colors ${
-                theme === t
-                  ? 'bg-accent text-white'
-                  : 'bg-surface border border-white/5 text-muted hover:text-text'
-              }`}
-            >
-              {t === 'dark' ? '🌙' : '☀️'} {t}
-            </button>
+        <h2 className="font-semibold text-sm">Deployment</h2>
+        <div className="space-y-2 text-sm">
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-muted">Chain ID</span>
+            <span>{deployment.chainId}</span>
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-muted">Deployer</span>
+            <span className="font-mono text-xs">{deployment.deployer}</span>
+          </div>
+          {deployment.contracts.map((contract) => (
+            <div key={contract.address} className="flex items-center justify-between gap-4">
+              <span className="text-muted">{contract.name}</span>
+              <span className="font-mono text-xs">{contract.address.slice(0, 10)}...{contract.address.slice(-6)}</span>
+            </div>
           ))}
         </div>
       </section>

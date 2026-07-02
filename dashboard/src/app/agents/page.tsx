@@ -1,19 +1,42 @@
-import { agents, type AgentStatus } from '@/lib/mock-data'
+import { deployment, getLiveDashboardData } from '@/lib/avalanche'
 
-const statusColor: Record<AgentStatus, string> = {
-  Active: 'bg-green-500/15 text-green-400',
-  Paused: 'bg-yellow-500/15 text-yellow-400',
-  Stopped: 'bg-red-500/15 text-red-400',
-}
+export default async function AgentsPage() {
+  const live = await getLiveDashboardData()
+  const agentRegistry = live.contracts.find((contract) => contract.key === 'agentRegistry')
 
-export default function AgentsPage() {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Agents</h1>
-        <button className="bg-accent text-white text-sm font-medium rounded-lg px-4 py-2 hover:opacity-90 transition-opacity">
-          + Deploy Agent
-        </button>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Agents</h1>
+          <p className="text-sm text-muted mt-1">Live deployment metadata for AgentRegistry on Fuji.</p>
+        </div>
+        <a
+          href={agentRegistry?.explorerUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="bg-accent text-white text-sm font-medium rounded-lg px-4 py-2 hover:opacity-90 transition-opacity"
+        >
+          Open Contract
+        </a>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="bg-card rounded-xl p-5 border border-white/5">
+          <p className="text-muted text-sm">Registry Status</p>
+          <p className="text-2xl font-bold mt-1">{agentRegistry?.deployed ? 'Live' : 'Missing'}</p>
+          <p className="text-green-400 text-sm mt-1">Fuji RPC checked</p>
+        </div>
+        <div className="bg-card rounded-xl p-5 border border-white/5">
+          <p className="text-muted text-sm">Chain</p>
+          <p className="text-2xl font-bold mt-1">{deployment.chainId}</p>
+          <p className="text-green-400 text-sm mt-1">Avalanche Fuji</p>
+        </div>
+        <div className="bg-card rounded-xl p-5 border border-white/5">
+          <p className="text-muted text-sm">Bytecode Size</p>
+          <p className="text-2xl font-bold mt-1">{agentRegistry?.codeBytes.toLocaleString('en-US') ?? '0'}</p>
+          <p className="text-green-400 text-sm mt-1">On-chain code present</p>
+        </div>
       </div>
 
       <div className="bg-surface rounded-xl border border-white/5 overflow-hidden">
@@ -21,27 +44,31 @@ export default function AgentsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/5 text-muted text-left">
-                <th className="px-5 py-3 font-medium">Name</th>
-                <th className="px-5 py-3 font-medium">Type</th>
-                <th className="px-5 py-3 font-medium">Wallet</th>
-                <th className="px-5 py-3 font-medium">Status</th>
-                <th className="px-5 py-3 font-medium text-right">Txns</th>
+                <th className="px-5 py-3 font-medium">Field</th>
+                <th className="px-5 py-3 font-medium">Value</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {agents.map((a) => (
-                <tr key={a.id} className="hover:bg-white/[0.02]">
-                  <td className="px-5 py-3 font-medium">{a.name}</td>
-                  <td className="px-5 py-3 text-muted">{a.type}</td>
-                  <td className="px-5 py-3 font-mono text-xs text-muted">{a.wallet.slice(0, 6)}...{a.wallet.slice(-4)}</td>
-                  <td className="px-5 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${statusColor[a.status]}`}>
-                      {a.status}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3 text-right tabular-nums">{a.transactions.toLocaleString()}</td>
-                </tr>
-              ))}
+              <tr>
+                <td className="px-5 py-3 font-medium">Contract</td>
+                <td className="px-5 py-3">AgentRegistry</td>
+              </tr>
+              <tr>
+                <td className="px-5 py-3 font-medium">Address</td>
+                <td className="px-5 py-3 font-mono text-xs break-all text-muted">{agentRegistry?.address}</td>
+              </tr>
+              <tr>
+                <td className="px-5 py-3 font-medium">Deployer</td>
+                <td className="px-5 py-3 font-mono text-xs break-all text-muted">{live.deployerBalanceAvax} AVAX at {deployment.deployer}</td>
+              </tr>
+              <tr>
+                <td className="px-5 py-3 font-medium">Purpose</td>
+                <td className="px-5 py-3 text-muted">{agentRegistry?.purpose}</td>
+              </tr>
+              <tr>
+                <td className="px-5 py-3 font-medium">Last Snapshot</td>
+                <td className="px-5 py-3 text-muted">{new Date(live.refreshedAt).toLocaleString('en-US')}</td>
+              </tr>
             </tbody>
           </table>
         </div>
