@@ -1,0 +1,14 @@
+[
+  {
+    "address": "0xDEDB5f8746F50620CBc9d8b7aF5F331969CbD2A4",
+    "label": "Main Treasury"
+  },
+  {
+    "address": "0x1234567890abcdef1234567890abcdef12345678",
+    "label": "Trading Wallet"
+  },
+  {
+    "address": "0xabcdef1234567890abcdef1234567890abcdef12",
+    "label": "Quest Rewards"
+  }
+]
