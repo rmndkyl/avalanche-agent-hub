@@ -70,7 +70,7 @@ Current repo/package state is a single published package. Longer-term modular sp
 
 ### 3. Dashboard
 - Next.js app under `dashboard/`
-- production URL: `https://dashboard-mauve-eight-44.vercel.app`
+- production URL: `https://avalanche-agent-hub.vercel.app`
 
 What it proves now:
 - live Fuji RPC snapshot
@@ -124,7 +124,7 @@ Lead with:
 
 - GitHub: https://github.com/agenthubavax/avalanche-agent-hub
 - Landing page: https://agenthubavax.github.io/avalanche-agent-hub/
-- Dashboard: https://dashboard-mauve-eight-44.vercel.app
+- Dashboard: https://avalanche-agent-hub.vercel.app
 - npm: https://www.npmjs.com/package/agent-hub-avax
 - Twitter: https://x.com/AgentHubAvax
 

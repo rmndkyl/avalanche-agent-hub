@@ -6,7 +6,7 @@ Last updated: 2026-07-05
 - Official GitHub: https://github.com/agenthubavax/avalanche-agent-hub
 - Mirror GitHub: https://github.com/rmndkyl/avalanche-agent-hub
 - Landing page: https://agenthubavax.github.io/avalanche-agent-hub/
-- Dashboard live: https://dashboard-mauve-eight-44.vercel.app
+- Dashboard live: https://avalanche-agent-hub.vercel.app
 - npm package: https://www.npmjs.com/package/agent-hub-avax
 - Twitter: https://x.com/AgentHubAvax
 
@@ -41,7 +41,7 @@ Last updated: 2026-07-05
 - Sourcify: verified ✅
 
 ## Latest verified dashboard state
-- Public URL: `https://dashboard-mauve-eight-44.vercel.app`
+- Public URL: `https://avalanche-agent-hub.vercel.app`
 - Public homepage shows `Live Fuji RPC snapshot`
 - Public homepage shows `Latest Block`
 - Public `/agents` shows `Registry Status: Live`

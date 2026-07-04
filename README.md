@@ -77,7 +77,7 @@ That is stronger for grant credibility than a static landing page alone.
 
 ### Dashboard
 - app path: `dashboard/`
-- production URL: https://dashboard-mauve-eight-44.vercel.app
+- production URL: https://avalanche-agent-hub.vercel.app
 - shows live Fuji RPC snapshot, latest block, gas, deployer balance, contract bytecode presence
 
 ## Current product truth
@@ -114,7 +114,7 @@ That split is still future direction, not current external product truth.
 
 - GitHub: https://github.com/agenthubavax/avalanche-agent-hub
 - Landing page: https://agenthubavax.github.io/avalanche-agent-hub/
-- Dashboard: https://dashboard-mauve-eight-44.vercel.app
+- Dashboard: https://avalanche-agent-hub.vercel.app
 - npm: https://www.npmjs.com/package/agent-hub-avax
 - Twitter: https://x.com/AgentHubAvax
 
