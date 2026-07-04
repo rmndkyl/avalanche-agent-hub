@@ -8,5 +8,18 @@ cache/
 .DS_Store
 coverage/
 .turbo/
+.vercel/
+.next/
 
-.vercel
+# Dashboard build output
+dashboard/.next/
+dashboard/.vercel/
+
+# Internal drafts / marketing content (published externally)
+blog/
+
+# Image assets (hosted externally or local-only)
+images/
+
+# Deployment artifacts (keep scripts — useful for contributors)
+# scripts/deploy-*.js
